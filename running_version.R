@@ -6,7 +6,10 @@ library(openxlsx)
 
 # Assume the data is preloaded or read outside the server function for simplicity in this example
 # You should ensure the file path and method of loading the data fit your actual use case
-dt_data <- read_excel("Data/data_decision_tree.xlsx")
+#dt_data <- read_excel("Data/data_decision_tree.xlsx")
+
+dt_data <- read_excel("data_decision_tree.xlsx")
+
 
 # Define UI
 ui <- fluidPage(
@@ -31,55 +34,51 @@ ui <- fluidPage(
 
 
 # Define server logic
-server <- function(input, output) {
-  # Reactive value to store filtered data
- filtered_data <- reactive({
-  if (input$col_datatype == "" && input$col_perspective == "" &&
-      input$col_granularity == "" && input$col_targeted == "") {
-    return(dt_data)  # Show all publications when no filters are selected
-  }
+server <- function(input, output, session) {
   
-  dt_data %>%
-    filter(
-      (input$col_datatype == "" | datatype == input$col_datatype),
-      (input$col_perspective == "" | perspective == input$col_perspective),
-      (input$col_granularity == "" | granularity == input$col_granularity),
-      (input$col_targeted == "" | targeted == input$col_targeted)
-    )
-})
-
-  
-  # Dynamic UI for selecting perspective based on datatype
-  output$perspective_ui <- renderUI({
-    if (is.null(input$datatype) || input$datatype == "") return(NULL)
-    selectInput("perspective", "Choose Perspective:", choices = c("", unique(dt_data[dt_data$datatype == input$datatype,]$perspective)))
+  # Reactive dataset filtering based on user selections
+  filtered_data <- reactive({
+    dt_data %>%
+      filter(
+        if (input$col_datatype != "") datatype == input$col_datatype else TRUE,
+        if (input$col_perspective != "") perspective == input$col_perspective else TRUE,
+        if (input$col_granularity != "") granularity == input$col_granularity else TRUE,
+        if (input$col_targeted != "") targeted == input$col_targeted else TRUE
+      )
   })
   
-  # Dynamic UI for selecting granularity based on perspective
-  output$granularity_ui <- renderUI({
-    req(input$perspective)
-    selectInput("granularity", "Choose Granularity:", choices = c("", unique(dt_data[dt_data$perspective == input$perspective,]$granularity)))
-  })
-  
-  # Dynamic UI for selecting targeted based on granularity
-  output$targeted_ui <- renderUI({
-    req(input$granularity)
-    selectInput("targeted", "Choose Targeted Option:", choices = c("", unique(dt_data[dt_data$granularity == input$granularity,]$targeted)))
-  })
-  
-  # Render filtered data table
-  output$table_filtered <- renderDataTable({
+  # Show the filtered data in a table
+  output$recommendations_table <- renderDataTable({
     filtered_data()
-  }, options = list(pageLength = 5, autoWidth = TRUE)) # Customize table display options
+  })
   
-  # Download handler for filtered data
+  # Download handler for filtered data as BibTeX
   output$download_filtered <- downloadHandler(
-    filename = function() { paste("filtered_data-", Sys.Date(), ".xlsx", sep = "") },
+    filename = function() { 
+      paste("filtered_data-", Sys.Date(), ".bib", sep = "") 
+    },
     content = function(file) {
-      write.xlsx(filtered_data(), file)
+      writeLines("Your BibTeX content here", file)  # Replace this with actual BibTeX formatting logic
     }
   )
 }
+
+
+
+
+
+
+
+  
+  
+
+
+mainPanel(
+  dataTableOutput("recommendations_table")  # Make sure this exists
+)
+
+
+
 
 # Run the application
 shinyApp(ui, server)
