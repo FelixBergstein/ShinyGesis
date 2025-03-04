@@ -26,7 +26,7 @@ ui <- fluidPage(
     ),
     mainPanel(
       dataTableOutput("recommendations_table"), 
-      downloadButton("download_table", "Download Recommendation Table")
+      downloadButton("download_bibtex", "Download as BibTeX")
     )
   )
 )
@@ -52,15 +52,47 @@ server <- function(input, output, session) {
     filtered_data()
   })
   
-  # Download handler for filtered data as BibTeX
-  output$download_filtered <- downloadHandler(
-    filename = function() { 
-      paste("filtered_data-", Sys.Date(), ".bib", sep = "") 
+  
+  
+  
+  output$download_bibtex <- downloadHandler(
+    filename = function() {
+      paste("filtered_data-", Sys.Date(), ".bib", sep = "")  # Ensure the file is named with a .bib extension
     },
     content = function(file) {
-      writeLines("Your BibTeX content here", file)  # Replace this with actual BibTeX formatting logic
-    }
+      filtered <- filtered_data()  # Assuming this is the data you filtered based on selections
+      
+      # Initialize an empty string to store the BibTeX content
+      bibtex_content <- ""
+      
+      # Loop over each row to create a BibTeX entry for each record
+      for (i in 1:nrow(filtered)) {
+        authors <- filtered$Authors[i]
+        title <- filtered$Title[i]  # Assuming you have columns for title
+        doi <- filtered$DOI[i]      # Assuming you have columns for DOI
+        year <- filtered$Year[i]    # Assuming you have columns for year
+        
+        # Create the BibTeX entry format
+        bibtex_entry <- paste0(
+          "@article{", gsub(" ", "", authors), year, ",\n",  # Key based on authors and year
+          "  author = {", authors, "},\n",
+          "  title = {", title, "},\n",
+          "  year = {", year, "},\n",
+          "  doi = {", doi, "},\n",
+          "  journal = {Sample Journal},\n",  # Add more fields if required
+          "}\n\n"
+        )
+        
+        # Append this entry to the BibTeX content string
+        bibtex_content <- paste0(bibtex_content, bibtex_entry)
+      }
+      
+      # Write the BibTeX content to the downloaded file
+      writeLines(bibtex_content, con = file)
+    },
+    contentType = "application/x-bibtex"  # Ensures the browser treats it as a BibTeX file
   )
+  
 }
 
 
