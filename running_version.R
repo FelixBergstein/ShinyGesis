@@ -4,6 +4,8 @@ library(dplyr)
 library(readxl)
 library(openxlsx)
 
+
+
 # Assume the data is preloaded or read outside the server function for simplicity in this example
 # You should ensure the file path and method of loading the data fit your actual use case
 #dt_data <- read_excel("Data/data_decision_tree.xlsx")
@@ -33,6 +35,9 @@ ui <- fluidPage(
 
 
 
+
+
+
 # Define server logic
 server <- function(input, output, session) {
   
@@ -55,42 +60,36 @@ server <- function(input, output, session) {
   
   
   
+  
+  
   output$download_bibtex <- downloadHandler(
-    filename = function() {
-      paste("filtered_data-", Sys.Date(), ".bib", sep = "")  # Ensure the file is named with a .bib extension
-    },
+    filename = function() { paste("recommendations_", Sys.Date(), ".bib", sep = "") },
     content = function(file) {
-      filtered <- filtered_data()  # Assuming this is the data you filtered based on selections
-      
-      # Initialize an empty string to store the BibTeX content
-      bibtex_content <- ""
-      
-      # Loop over each row to create a BibTeX entry for each record
-      for (i in 1:nrow(filtered)) {
-        authors <- filtered$Authors[i]
-        title <- filtered$Title[i]  # Assuming you have columns for title
-        doi <- filtered$DOI[i]      # Assuming you have columns for DOI
-        year <- filtered$Year[i]    # Assuming you have columns for year
+      # Creating the BibTeX entry string for each row
+      bibtex_entries <- apply(filtered_data(), 1, function(row) {
+        authors <- gsub("'", "''", row["Authors"])  # Replace single quotes with double quotes
+        doi <- row["DOI"]
+        id <- row["ID"]
+        title <- row["Title"]  # Assuming you have a Title column
         
-        # Create the BibTeX entry format
-        bibtex_entry <- paste0(
-          "@article{", gsub(" ", "", authors), year, ",\n",  # Key based on authors and year
+        # Ensure proper BibTeX formatting
+        entry <- paste0(
+          "@article{", 
+          id, ",\n",  # Use the ID as the citation key
           "  author = {", authors, "},\n",
-          "  title = {", title, "},\n",
-          "  year = {", year, "},\n",
-          "  doi = {", doi, "},\n",
-          "  journal = {Sample Journal},\n",  # Add more fields if required
-          "}\n\n"
+          "  title = {", title, "},\n",  # Add the title from the dataset
+          "  journal = {No journal information},\n",  # Add a placeholder journal field
+          "  year = {No year information},\n",  # Add a placeholder year field
+          "  doi = {", doi, "}\n",
+          "}\n"
         )
         
-        # Append this entry to the BibTeX content string
-        bibtex_content <- paste0(bibtex_content, bibtex_entry)
-      }
+        return(entry)
+      })
       
-      # Write the BibTeX content to the downloaded file
-      writeLines(bibtex_content, con = file)
-    },
-    contentType = "application/x-bibtex"  # Ensures the browser treats it as a BibTeX file
+      # Write the formatted BibTeX entries to the file
+      writeLines(bibtex_entries, file)
+    }
   )
   
 }
