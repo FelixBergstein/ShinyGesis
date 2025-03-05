@@ -13,22 +13,32 @@ library(openxlsx)
 dt_data <- read_excel("data_decision_tree.xlsx")
 
 
-# Define UI
 ui <- fluidPage(
-  titlePanel("Decision Tree"),
-  sidebarLayout(
-    sidebarPanel(
-      helpText("This Decision Tree will help you find the best way to handle your Data"),
-      
-      # Dropdowns are immediately visible with all options available
-      selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
-      selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
-      selectInput("col_granularity", "Granularity:", choices = c("", unique(dt_data$granularity))),
-      selectInput("col_targeted", "Targeted:", choices = c("", unique(dt_data$targeted)))
+  # Add a top panel to switch between the sections
+  navbarPage(
+    title = "Data Analysis",
+    
+    # Decision Tree tab
+    tabPanel("Decision Tree", 
+             sidebarLayout(
+               sidebarPanel(
+                 helpText("This Decision Tree will help you find the best way to handle your Data"),
+                 
+                 selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
+                 selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
+                 selectInput("col_granularity", "Granularity:", choices = c("", unique(dt_data$granularity)))
+               ),
+               mainPanel(
+                 dataTableOutput("recommendations_table"), 
+                 downloadButton("download_bibtex", "Download as BibTeX")
+               )
+             )
     ),
-    mainPanel(
-      dataTableOutput("recommendations_table"), 
-      downloadButton("download_bibtex", "Download as BibTeX")
+    
+    # Background tab (empty for now)
+    tabPanel("Background", 
+             # Placeholder for content
+             h3("Background content will be added here.")
     )
   )
 )
@@ -47,16 +57,15 @@ server <- function(input, output, session) {
       filter(
         if (input$col_datatype != "") datatype == input$col_datatype else TRUE,
         if (input$col_perspective != "") perspective == input$col_perspective else TRUE,
-        if (input$col_granularity != "") granularity == input$col_granularity else TRUE,
-        if (input$col_targeted != "") targeted == input$col_targeted else TRUE
+        if (input$col_granularity != "") granularity == input$col_granularity else TRUE
       )
   })
   
   # Show the filtered data in a table
   output$recommendations_table <- renderDataTable({
-    filtered_data()
+    filtered_data() %>%
+      select(Title, Authors, DOI)  # Select only the columns you want to display
   })
-  
   
   
   
