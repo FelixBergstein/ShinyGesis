@@ -17,14 +17,19 @@ ui <- fluidPage(
   # Add custom CSS to style the panel
   tags$head(
     tags$style(HTML("
-      .decision-tree-panel {
-        background-color: #f0f0f0;  /* Light grey background */
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      }
-    "))
-  ),
+    .decision-tree-panel {
+      background-color: #f0f0f0;  /* Light grey background */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bar-chart {
+      margin-bottom: 30px;  /* Increase space between the two graphs */
+    }
+  "))
+  )
+  ,
   
   navbarPage(
     title = "Data Analysis",
@@ -35,8 +40,8 @@ ui <- fluidPage(
              fluidRow(
                # Left column for both bar charts (one-third of the page width)
                column(4, 
-                      plotOutput("bar_chart"),  # First graph here
-                      plotOutput("bar_chart_2")  # Second graph here
+                      div(class = "bar-chart", plotOutput("bar_chart")),  # First graph here with margin
+                      div(class = "bar-chart", plotOutput("bar_chart_2"))  # Second graph here with margin
                ),
                
                # Right column for the decision tree options and table (two-thirds of the page width)
@@ -61,10 +66,39 @@ ui <- fluidPage(
              downloadButton("download_bibtex", "Download as BibTeX")
     ),
     
-    # Background tab (empty for now)
-    tabPanel("Background", 
-             h3("Background content will be added here.")
+    # Background tab
+    tabPanel("Background",
+             fluidRow(
+               # Left column with main content
+               column(8,
+                      h2(id = "introduction", "Introduction"),
+                      p("This section will provide an introduction to the project."),
+                      
+                      h2(id = "project_description", "Project Description"),
+                      p("Here, we will describe the purpose and scope of the project."),
+                      
+                      h2(id = "paper_description", "Paper Description"),
+                      p("This section will outline the main paper used in the analysis."),
+                      
+                      h2(id = "decision_tree", "Decision Tree"),
+                      p("Explanation of how the decision tree works.")
+               ),
+               
+               # Right column with Table of Contents
+               column(4,
+                      wellPanel(
+                        h4("Table of Contents"),
+                        tags$ul(
+                          tags$li(tags$a(href = "#introduction", "Introduction")),
+                          tags$li(tags$a(href = "#project_description", "Project Description")),
+                          tags$li(tags$a(href = "#paper_description", "Paper Description")),
+                          tags$li(tags$a(href = "#decision_tree", "Decision Tree"))
+                        )
+                      )
+               )
+             )
     )
+    
   )
 )
 
@@ -89,35 +123,36 @@ server <- function(input, output, session) {
       )
   })
   
-  # Render the bar chart (Independent of the decision tree)
+  # First Bar Chart
   output$bar_chart <- renderPlot({
-    # Use the entire dataset without filtering based on decision tree options
     ggplot(dt_data, aes(x = datatype, fill = factor(granularity))) +
       geom_bar(position = "stack", color = "black") +  # Bar color and border
-      labs(title = "Distribution of papers by Datatype and Granularity", 
+      labs(title = "Distribution of Datatypes by Granularity", 
            x = "Datatype", 
            y = "Number of Cases") +
-      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define two colors for Granularity 1 and 2
+      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define colors for Granularity 1 and 2
                         name = "Granularity", 
-                        labels = c("Granularity 1", "Granularity 2")) +
-      theme_minimal() +  # Minimal theme for the plot
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+                        labels = c("1", "2")) +  # Label granularity as 1 and 2
+      theme_minimal() + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+            plot.title = element_text(face = "bold"))  # Make title bold
   })
   
-  # Render the second bar chart (Distribution by Perspective)
+  # Second Bar Chart
   output$bar_chart_2 <- renderPlot({
-    # Use the entire dataset (not affected by decision tree) for the second graph
     ggplot(dt_data, aes(x = perspective, fill = factor(granularity))) +
       geom_bar(position = "stack", color = "black") +  # Bar color and border
       labs(title = "Distribution of Perspectives by Granularity", 
            x = "Perspective", 
            y = "Number of Cases") +
-      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define two colors for Granularity 1 and 2
+      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define colors for Granularity 1 and 2
                         name = "Granularity", 
-                        labels = c("Granularity 1", "Granularity 2")) +
-      theme_minimal() +  # Minimal theme for the plot
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+                        labels = c("1", "2")) +  # Label granularity as 1 and 2
+      theme_minimal() + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels for readability
+            plot.title = element_text(face = "bold"))  # Make title bold
   })
+  
   
   
   
