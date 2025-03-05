@@ -14,34 +14,62 @@ dt_data <- read_excel("data_decision_tree.xlsx")
 
 
 ui <- fluidPage(
-  # Add a top panel to switch between the sections
+  # Add custom CSS to style the panel
+  tags$head(
+    tags$style(HTML("
+      .decision-tree-panel {
+        background-color: #f0f0f0;  /* Light grey background */
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    "))
+  ),
+  
   navbarPage(
     title = "Data Analysis",
     
     # Decision Tree tab
     tabPanel("Decision Tree", 
-             sidebarLayout(
-               sidebarPanel(
-                 helpText("This Decision Tree will help you find the best way to handle your Data"),
-                 
-                 selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
-                 selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
-                 selectInput("col_granularity", "Granularity:", choices = c("", unique(dt_data$granularity)))
+             # Split the layout into two rows
+             fluidRow(
+               # Left column for both bar charts (one-third of the page width)
+               column(4, 
+                      plotOutput("bar_chart"),  # First graph here
+                      plotOutput("bar_chart_2")  # Second graph here
                ),
-               mainPanel(
-                 dataTableOutput("recommendations_table"), 
-                 downloadButton("download_bibtex", "Download as BibTeX")
+               
+               # Right column for the decision tree options and table (two-thirds of the page width)
+               column(8, 
+                      # Decision Tree Panel (Options at the top)
+                      div(
+                        class = "decision-tree-panel",
+                        helpText("This Decision Tree will help you find the best way to handle your Data"),
+                        fluidRow(
+                          column(4, selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype)))),
+                          column(4, selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective)))),
+                          column(4, radioButtons("col_granularity", "Granularity:", choices = c("1", "2"), inline = TRUE))  # Horizontal radio buttons
+                        )
+                      ),
+                      
+                      # Below the decision tree, place the table
+                      dataTableOutput("recommendations_table")
                )
-             )
+             ),
+             
+             # First download button below the graph/table
+             downloadButton("download_bibtex", "Download as BibTeX")
     ),
     
     # Background tab (empty for now)
     tabPanel("Background", 
-             # Placeholder for content
              h3("Background content will be added here.")
     )
   )
 )
+
+
+
 
 
 
@@ -60,6 +88,38 @@ server <- function(input, output, session) {
         if (input$col_granularity != "") granularity == input$col_granularity else TRUE
       )
   })
+  
+  # Render the bar chart (Independent of the decision tree)
+  output$bar_chart <- renderPlot({
+    # Use the entire dataset without filtering based on decision tree options
+    ggplot(dt_data, aes(x = datatype, fill = factor(granularity))) +
+      geom_bar(position = "stack", color = "black") +  # Bar color and border
+      labs(title = "Distribution of papers by Datatype and Granularity", 
+           x = "Datatype", 
+           y = "Number of Cases") +
+      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define two colors for Granularity 1 and 2
+                        name = "Granularity", 
+                        labels = c("Granularity 1", "Granularity 2")) +
+      theme_minimal() +  # Minimal theme for the plot
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+  })
+  
+  # Render the second bar chart (Distribution by Perspective)
+  output$bar_chart_2 <- renderPlot({
+    # Use the entire dataset (not affected by decision tree) for the second graph
+    ggplot(dt_data, aes(x = perspective, fill = factor(granularity))) +
+      geom_bar(position = "stack", color = "black") +  # Bar color and border
+      labs(title = "Distribution of Perspectives by Granularity", 
+           x = "Perspective", 
+           y = "Number of Cases") +
+      scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  # Define two colors for Granularity 1 and 2
+                        name = "Granularity", 
+                        labels = c("Granularity 1", "Granularity 2")) +
+      theme_minimal() +  # Minimal theme for the plot
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+  })
+  
+  
   
   # Show the filtered data in a table
   output$recommendations_table <- renderDataTable({
