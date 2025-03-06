@@ -3,6 +3,7 @@ library(dplyr)
 library(readxl)
 library(openxlsx)
 library(ggplot2)
+library(DT)
 
 # Load Data
 dt_data <- read_excel("data_decision_tree.xlsx")
@@ -24,17 +25,33 @@ ui <- navbarPage(
                         class = "decision-tree-panel",
                         helpText("This Decision Tree will help you find the best way to handle your Data"),
                         fluidRow(
-                          column(4, selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype)))),
-                          column(4, selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective)))),
-                          column(4, radioButtons("col_granularity", 
-                                                 "Granularity:", 
-                                                 choices = c("-" = "", "1", "2"),  
-                                                 inline = TRUE, 
-                                                 selected = "")  
+                          column(4, 
+                                 div(style="display: flex; flex-direction: column; align-items: center;",
+                                     selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
+                                     actionButton("clear_datatype", "Clear")
+                                 )
+                          ),
+                          column(4, 
+                                 div(style="display: flex; flex-direction: column; align-items: center;",
+                                     selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
+                                     actionButton("clear_perspective", "Clear")
+                                 )
                           )
-                        )
-                      ),
-                      dataTableOutput("recommendations_table"),
+                          ,
+                          column(4, 
+                                 div(style="display: flex; flex-direction: column; align-items: center;",
+                                     radioButtons("col_granularity", 
+                                                  "Granularity:", 
+                                                  choices = c("-" = "", "1", "2"),  
+                                                  inline = TRUE, 
+                                                  selected = ""),
+                                     actionButton("clear_granularity", "Clear")
+                                     
+                                 )
+                          )
+                        ))
+                        ,
+                      DT::DTOutput("recommendations_table"),
                       downloadButton("download_bibtex", "Download as BibTeX")
                )
              )
@@ -81,15 +98,22 @@ server <- function(input, output, session) {
   filtered_data <- reactive({
     dt_data %>%
       filter(
-        if (input$col_datatype != "") datatype == input$col_datatype else TRUE,
-        if (input$col_perspective != "") perspective == input$col_perspective else TRUE,
-        if (input$col_granularity != "") granularity == input$col_granularity else TRUE  
+        (input$col_datatype == "" | datatype == input$col_datatype) &
+          (input$col_perspective == "" | perspective == input$col_perspective) &
+          (input$col_granularity == "" | granularity == input$col_granularity)
       )
   })
   
+
+  output$recommendations_table <- renderDataTable({
+    req(filtered_data())  # Ensure filtered_data() is not NULL
+    datatable(filtered_data(), options = list(pageLength = 10, autoWidth = TRUE))
+  })
+  
+  
   # Bar Chart 1
   output$bar_chart <- renderPlot({
-    ggplot(dt_data, aes(x = datatype, fill = factor(granularity))) +
+    ggplot(filtered_data(), aes(x = datatype, fill = factor(granularity))) +
       geom_bar(position = "stack", color = "black") +  
       labs(title = "Distribution of Datatypes by Granularity", 
            x = "Datatype", 
@@ -104,9 +128,9 @@ server <- function(input, output, session) {
   
   # Bar Chart 2
   output$bar_chart_2 <- renderPlot({
-    ggplot(dt_data, aes(x = perspective, fill = factor(granularity))) +
+    ggplot(filtered_data(), aes(x = perspective, fill = factor(granularity))) +
       geom_bar(position = "stack", color = "black") +  
-      labs(title = "Distribution of Perspectives by Granularity", 
+      labs(title = "Distribution of Perspectives by Perspective", 
            x = "Perspective", 
            y = "Number of Cases") +
       scale_fill_manual(values = c("1" = "#3498db", "2" = "#e74c3c"),  
@@ -117,23 +141,17 @@ server <- function(input, output, session) {
             plot.title = element_text(face = "bold"))  
   })
   
-  # Table Output
-  output$recommendations_table <- renderDataTable({
-    filtered_data() %>%
-      select(Title, Authors, DOI)  
-  })
-  
   # Download BibTeX
   output$download_bibtex <- downloadHandler(
     filename = function() { paste("recommendations_", Sys.Date(), ".bib", sep = "") },
     content = function(file) {
       bibtex_entries <- apply(filtered_data(), 1, function(row) {
-        authors <- gsub("'", "''", row["Authors"])  
-        doi <- row["DOI"]
-        id <- row["ID"]
-        title <- row["Title"]  
+        authors <- if ("Authors" %in% colnames(dt_data)) row["Authors"] else "Unknown"
+        doi <- if ("DOI" %in% colnames(dt_data)) row["DOI"] else "No DOI"
+        id <- if ("ID" %in% colnames(dt_data)) row["ID"] else paste0("entry", sample(1000:9999, 1))
+        title <- if ("Title" %in% colnames(dt_data)) row["Title"] else "Untitled"
         
-        entry <- paste0(
+        paste0(
           "@article{", 
           id, ",\n",  
           "  author = {", authors, "},\n",
@@ -143,14 +161,21 @@ server <- function(input, output, session) {
           "  doi = {", doi, "}\n",
           "}\n"
         )
-        
-        return(entry)
       })
-      
       writeLines(bibtex_entries, file)
     }
   )
+  
+  # Reset selection buttons
+  observeEvent(input$clear_datatype, {
+    updateSelectInput(session, "col_datatype", selected = "")
+  })
+  observeEvent(input$clear_perspective, {
+    updateSelectInput(session, "col_perspective", selected = "")
+  })
+  observeEvent(input$clear_granularity, {
+    updateRadioButtons(session, "col_granularity", selected = "")
+  })
 }
 
-# Run App
 shinyApp(ui, server)
