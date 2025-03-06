@@ -24,7 +24,8 @@ ui <- navbarPage(
                       div(
                         class = "decision-tree-panel",
                         helpText("This Decision Tree will help you find the best way to handle your Data"),
-                        fluidRow(
+                        div(style="border: 1px solid #ccc; background-color: #f8f9fa; padding: 15px; border-radius: 5px;margin-bottom: 20px;",
+                            fluidRow(
                           column(4, 
                                  div(style="display: flex; flex-direction: column; align-items: center;",
                                      selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
@@ -49,6 +50,7 @@ ui <- navbarPage(
                                      
                                  )
                           )
+                            )
                         ))
                         ,
                       DT::DTOutput("recommendations_table"),
