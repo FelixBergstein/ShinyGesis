@@ -10,7 +10,7 @@ dt_data <- read_excel("data_decision_tree.xlsx")
 
 # Define UI
 ui <- navbarPage(
-  title = "Data Analysis",
+  title = "Gesis",
   
   # Decision Tree Tab
   tabPanel("Decision Tree", 
@@ -24,35 +24,33 @@ ui <- navbarPage(
                       div(
                         class = "decision-tree-panel",
                         helpText("This Decision Tree will help you find the best way to handle your Data"),
-                        div(style="border: 1px solid #ccc; background-color: #f8f9fa; padding: 15px; border-radius: 5px;margin-bottom: 20px;",
+                        div(style="border: 1px solid #ccc; background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;",
                             fluidRow(
-                          column(4, 
-                                 div(style="display: flex; flex-direction: column; align-items: center;",
-                                     selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
-                                     actionButton("clear_datatype", "Clear")
-                                 )
-                          ),
-                          column(4, 
-                                 div(style="display: flex; flex-direction: column; align-items: center;",
-                                     selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
-                                     actionButton("clear_perspective", "Clear")
-                                 )
-                          )
-                          ,
-                          column(4, 
-                                 div(style="display: flex; flex-direction: column; align-items: center;",
-                                     radioButtons("col_granularity", 
-                                                  "Granularity:", 
-                                                  choices = c("-" = "", "1", "2"),  
-                                                  inline = TRUE, 
-                                                  selected = ""),
-                                     actionButton("clear_granularity", "Clear")
-                                     
-                                 )
-                          )
+                              column(4, 
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         selectInput("col_datatype", "Datatype:", choices = c("", unique(dt_data$datatype))),
+                                         actionButton("clear_datatype", "Clear")
+                                     )
+                              ),
+                              column(4, 
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         selectInput("col_perspective", "Perspective:", choices = c("", unique(dt_data$perspective))),
+                                         actionButton("clear_perspective", "Clear")
+                                     )
+                              ),
+                              column(4, 
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         radioButtons("col_granularity", 
+                                                      "Granularity:", 
+                                                      choices = c("-" = "", "1", "2"),  
+                                                      inline = TRUE, 
+                                                      selected = ""),
+                                         actionButton("clear_granularity", "Clear")
+                                     )
+                              )
                             )
-                        ))
-                        ,
+                        )
+                      ),
                       DT::DTOutput("recommendations_table"),
                       downloadButton("download_bibtex", "Download as BibTeX")
                )
@@ -63,6 +61,13 @@ ui <- navbarPage(
   # Background Tab
   tabPanel("Background",
            fluidPage(
+             tags$head(
+               tags$style(HTML("
+                 p {
+                   text-align: justify;
+                 }
+               "))
+             ),
              fluidRow(
                column(8,
                       h2(id = "introduction", "Introduction"),
@@ -75,23 +80,66 @@ ui <- navbarPage(
                       p("This section will outline the main paper used in the analysis."),
                       
                       h2(id = "decision_tree", "Decision Tree"),
-                      p("Explanation of how the decision tree works.")
+                      p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about. 
+                      They are sorted by Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers.", br(),  
+                        "Secondly, you can filter the papers based on their perspective on the subject, which is sorted into Data, User, Data and User, Analytical frames and Challenges.", br(),  
+                        "Lastly, you can filter the papers based on their granularity, which is binary at 1 or 2.", br(),  
+                        "After having chosen what factors to filter the papers by, you can download the selection as a BibTeX file for citation.")
                ),
+               
+               
                column(4,
                       wellPanel(
-                        h4("Table of Contents"),
-                        tags$ul(
-                          tags$li(tags$a(href = "#introduction", "Introduction")),
-                          tags$li(tags$a(href = "#project_description", "Project Description")),
-                          tags$li(tags$a(href = "#paper_description", "Paper Description")),
-                          tags$li(tags$a(href = "#decision_tree", "Decision Tree"))
+                        tags$head(
+                          tags$style(HTML("
+             .toc-list {
+               padding-left: 0;
+             }
+             .toc-list li {
+               border-bottom: 1px solid black;
+               list-style-type: none;
+               font-size: 14px;
+               padding: 5px 10px;
+               transition: background-color 0.2s ease-in-out;
+             }
+             .toc-list li:last-child {
+               border-bottom: none;
+             }
+             .toc-list li:hover {
+               background-color: lightgrey;
+             }
+             .toc-list li a {
+               text-decoration: none;
+               color: black;
+               display: block;
+               width: 100%;
+             }
+             .well {
+               background-color: transparent !important;
+               border: none;
+               box-shadow: none;
+               padding: 10px;
+             }
+           "))
+                        ),
+                        h4("Table of Contents", style = "font-size: 16px; font-weight: bold;"),
+                        tags$ul(class = "toc-list",
+                                tags$li(tags$a(href = "#introduction", "1. Introduction")),
+                                tags$li(tags$a(href = "#project_description", "2. Project Description")),
+                                tags$li(tags$a(href = "#paper_description", "3. Paper Description")),
+                                tags$li(tags$a(href = "#decision_tree", "4. Decision Tree"))
                         )
                       )
+               )
+              
+               
+               
                )
              )
            )
   )
-)
+
+
 
 # Define Server
 server <- function(input, output, session) {
@@ -107,9 +155,10 @@ server <- function(input, output, session) {
   })
   
 
+  # Table Output
   output$recommendations_table <- renderDataTable({
-    req(filtered_data())  # Ensure filtered_data() is not NULL
-    datatable(filtered_data(), options = list(pageLength = 10, autoWidth = TRUE))
+    filtered_data() %>%
+      select(Title, Authors, DOI)  
   })
   
   
