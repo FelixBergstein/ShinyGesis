@@ -6,7 +6,7 @@ library(ggplot2)
 library(DT)
 
 # Load Data
-dt_data <- read_excel("data_decision_tree.xlsx")
+dt_data <- read_excel("data/data_decision_tree.xlsx")
 
 # Define UI
 ui <- navbarPage(
