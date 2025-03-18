@@ -26,7 +26,8 @@ ui <- navbarPage(
              fluidRow(
                column(4, 
                       div(class = "bar-chart", plotOutput("bar_chart")),  
-                      div(class = "bar-chart", plotOutput("bar_chart_2"))
+                      div(class = "paper-count", uiOutput("paper_count"))
+                      
                ),
                column(8, 
                       div(
@@ -48,7 +49,7 @@ ui <- navbarPage(
                               ),
                               column(4, 
                                      div(style="display: flex; flex-direction: column; align-items: center;",
-                                         selectInput("col_granularity", "Perspective:", choices = c("", "general", "specific")),
+                                         selectInput("col_granularity", "Granularity:", choices = c("", "general", "specific")),
                                          
                                          actionButton("clear_granularity", "Clear")
                                      )
@@ -76,13 +77,15 @@ ui <- navbarPage(
              fluidRow(
                column(8,
                       h2(id = "introduction", "Introduction"),
-                      p("This section will provide an introduction to the project."),
+                      p("This project provides a comprehensive analysis of data quality in digital social research, highlighting the challenges and strategies involved in ensuring reliable results. It features a decision tree that allows users to filter and download relevant papers cited in the research. The decision tree makes it easy to explore the 53 papers referenced in the study based on specific criteria, including datatype, perspective, and granularity. Whether you're a researcher looking for targeted insights or simply interested in understanding the state of digital social research, this tool offers a convenient way to navigate through the literature. The papers available for download are organized to meet the needs of various research contexts."),
                       
-                      h2(id = "project_description", "Project Description"),
-                      p("Here, we will describe the purpose and scope of the project."),
                       
                       h2(id = "paper_description", "Paper Description"),
-                      p("This section will outline the main paper used in the analysis."),
+                      p("In the age of digital social research, ensuring the quality of data is more important than ever. As researchers increasingly rely on digital data sources like social media, web scraping, and mobile applications, it is crucial to understand the challenges that come with using such data. This research explores the various dimensions of data quality, including accuracy, completeness, consistency, and validity, and identifies the key issues researchers face in these areas. One of the major concerns is the presence of bias, noise, and the representativeness of digital data, which can significantly impact the reliability of findings.
+
+To address these challenges, we discuss effective strategies for improving data quality, such as data cleaning, validation techniques, and triangulating with traditional research methods. Transparency in data collection and analysis is essential, and researchers must disclose their methodologies and data sources to ensure trustworthiness. Ethical considerations, particularly regarding privacy, consent, and data ownership, are also critical when working with digital data.
+
+Looking forward, this research calls for the development of standardized metrics and guidelines to assess data quality in digital social research. An interdisciplinary approach, combining insights from social science, computer science, and data ethics, is needed to navigate the complexities of digital data. By improving data quality assessment frameworks, we aim to provide researchers with the tools they need to conduct more reliable and ethical digital social research."),
                       
                       h2(id = "decision_tree", "Decision Tree"),
                       p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about. 
@@ -187,53 +190,66 @@ server <- function(input, output, session) {
   })
   
   
-  # Bar Chart 1: Data Type Distribution
+  # Bar Chart 1: Data Type Distribution with Granularity
   output$bar_chart <- renderPlot({
-    # Get the filtered dataset
+    # Get the filtered dataset based on decision tree
     data_long <- filtered_data() %>%
-      select(Untargeted,`Social Media Data`, `Register Data`, `Survey Data`, `Sensor Data`, `Visual Data`) %>%
+      select(Untargeted, `Social Media Data`, `Register Data`, `Survey Data`, `Sensor Data`, `Visual Data`, dummy_granularity) %>%
       mutate_all(~replace_na(., 0)) %>%  # Replace NA with 0
-      pivot_longer(cols = everything(), names_to = "datatype", values_to = "value") %>%
+      pivot_longer(cols = -dummy_granularity, names_to = "datatype", values_to = "value") %>%
       mutate(value = as.numeric(value)) %>%  # Ensure numeric values
       filter(value == 1) %>%
-      count(datatype)
+      mutate(granularity = factor(ifelse(dummy_granularity == "specific", "Specific", "General"), levels = c("General", "Specific"))) %>%
+      count(datatype, granularity)
+    
+    # Fix the order of 'datatype' factor and reverse it
+    data_long$datatype <- factor(data_long$datatype, levels = c("Sensor Data", "Social Media Data", "Register Data", "Untargeted", "Survey Data"))
     
     # Prevent ggplot errors when no data is available
     if (nrow(data_long) == 0) {
       return(NULL)
     }
     
-    ggplot(data_long, aes(x = reorder(datatype, n), y = n, fill = datatype)) +
-      geom_bar(stat = "identity") +
+    # Plot the bar chart with fixed and reversed order of data types
+    ggplot(data_long, aes(x = datatype, y = n, fill = interaction(datatype, granularity, sep = "."))) +
+      geom_bar(stat = "identity", position = "stack") +
       coord_flip() +  # Flip bars for better readability
       theme_minimal() +
-      scale_fill_brewer(palette = "Pastel1")+
-      labs(title = "Distribution of Data Types", x = "Data Type", y = "Count") +
-      theme(legend.position = "none")
+      scale_fill_manual(values = c(
+        "Untargeted.General" = "#FEE0D2", "Untargeted.Specific" = "#FBB4AE",
+        "Social Media Data.General" = "#CCE1F2", "Social Media Data.Specific" = "#B3CDE3",
+        "Register Data.General" = "#EADAF2", "Register Data.Specific" = "#DECBE4",
+        "Survey Data.General" = "#FFE6BF", "Survey Data.Specific" = "#FED9A6",
+        "Sensor Data.General" = "#FFFFE0", "Sensor Data.Specific" = "#FFFFCC",
+        "Visual Data.General" = "#F2E6D2", "Visual Data.Specific" = "#E5D8BD"
+      )) +
+      labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
+      theme(legend.position = "none")  # Remove the legend
   })
   
   
-  # Bar Chart 2: Perspective Distribution (Now Uses the Same Filtered Dataset)
-  output$bar_chart_2 <- renderPlot({
-    # Get the filtered dataset
-    data_perspective <- filtered_data() %>%
-      select(dummy_extrinsic, dummy_intrinsic) %>%
-      pivot_longer(cols = everything(), names_to = "perspective", values_to = "value") %>%
-      filter(value == 1) %>%
-      count(perspective)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # Paper Count Display
+  output$paper_count <- renderUI({
+    count <- nrow(filtered_data())  # Get the number of filtered papers
     
-    # Prevent ggplot errors when no data is available
-    if (nrow(data_perspective) == 0) {
-      return(NULL)
-    }
-    
-    ggplot(data_perspective, aes(x = perspective, y = n, fill = perspective)) +
-      geom_bar(stat = "identity") +
-      theme_minimal() +
-      scale_fill_brewer(palette = "Greys")+
-      labs(title = "Distribution of Perspectives", x = "Perspective", y = "Count") +
-      theme(legend.position = "none")
+    div(style = "border: 2px solid black; padding: 20px; border-radius: 10px; text-align: center; width: 200px; margin: auto;",
+        div(style = "font-size: 40px; font-weight: bold;", count),
+        div(style = "font-size: 14px; color: grey; margin-top: 5px;", "Papers Selected")
+    )
   })
+   
   
   
   # Download BibTeX
