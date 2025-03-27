@@ -7,9 +7,9 @@ library(DT)
 library(tidyverse)
 
 # Load Data
-dt_data <- read_excel("data/data_v2.xlsx") |> 
+dt_data <- read_excel("data/data_v2.xlsx") |>
   rename("Untargeted"= dtype_untargeted,
-    "Survey Data" = dtype_survey , 
+    "Survey Data" = dtype_survey ,
           "Sensor Data" = dtype_sensor,
           "Social Media Data" = dtype_wsm,
           "Visual Data" = dtype_visual,
@@ -19,60 +19,6 @@ dt_data <- read_excel("data/data_v2.xlsx") |>
 # Define UI
 ui <- navbarPage(
   title = "Data Quality",
-  
-  # Decision Tree Tab
-  tabPanel("Decision Tree", 
-           fluidPage(
-             fluidRow(
-               column(4, 
-                      div(class = "bar-chart", plotOutput("bar_chart")),  
-                      div(class = "paper-count", uiOutput("paper_count"))
-                      
-               ),
-               column(8, 
-                      div(
-                        class = "decision-tree-panel",
-                        helpText("Filter the list of Data Quality Frameworks using the drop-down filters below:"),
-                        div(style="border: 1px solid #ccc; background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;",
-                            fluidRow(
-                              column(4, 
-                                     div(style="display: flex; flex-direction: column; align-items: center;",
-                                         selectInput("col_datatype", "Datatype:", choices = c("","Untargeted", "Social Media Data", "Visual Data", "Survey Data", "Sensor Data", "Register Data")),
-                                         actionButton("clear_datatype", "Clear")
-                                     )
-                              ),
-                              column(4, 
-                                     div(style="display: flex; flex-direction: column; align-items: center;",
-                                         selectInput("col_perspective", "Perspective:", choices = c("", "extrinsic", "intrinsic")),
-                                         actionButton("clear_perspective", "Clear")
-                                     )
-                              ),
-                              column(4, 
-                                     div(style="display: flex; flex-direction: column; align-items: center;",
-                                         selectInput("col_granularity", "Granularity:", choices = c("", "general", "specific")),
-                                         
-                                         actionButton("clear_granularity", "Clear")
-                                     )
-                              )
-                            )
-                        )
-                      ),
-                      DT::DTOutput("recommendations_table"),
-                      downloadButton("download_bibtex", "Download as BibTeX")
-               )
-             )
-           )
-  ),
-  
-  
-  tabPanel("Evidence Gap Map",
-           tags$iframe(
-             src = "map_final.html",
-             width = "100%",
-             height = "1000px",
-             style = "border:none; overflow:auto;"
-           )
-  ),
   # Background Tab
   tabPanel("Background",
            fluidPage(
@@ -84,28 +30,31 @@ ui <- navbarPage(
                "))
              ),
              fluidRow(
-               column(8,
-                      h2(id = "introduction", "Introduction"),
-                      p("This project provides a comprehensive analysis of data quality in digital social research, highlighting the challenges and strategies involved in ensuring reliable results. It features a decision tree that allows users to filter and download relevant papers cited in the research. The decision tree makes it easy to explore the 53 papers referenced in the study based on specific criteria, including datatype, perspective, and granularity. Whether you're a researcher looking for targeted insights or simply interested in understanding the state of digital social research, this tool offers a convenient way to navigate through the literature. The papers available for download are organized to meet the needs of various research contexts."),
-                      
-                      
+               column(10,
+                      h1(id = "introduction", "Welcome"),
+                      p("This app provides tools that you can use to
+
+
+                        project provides a comprehensive analysis of data quality in digital social research, highlighting the challenges and strategies involved in ensuring reliable results. It features a decision tree that allows users to filter and download relevant papers cited in the research. The decision tree makes it easy to explore the 53 papers referenced in the study based on specific criteria, including datatype, perspective, and granularity. Whether you're a researcher looking for targeted insights or simply interested in understanding the state of digital social research, this tool offers a convenient way to navigate through the literature. The papers available for download are organized to meet the needs of various research contexts."),
+
+
                       h2(id = "paper_description", "Paper Description"),
                       p("In the age of digital social research, ensuring the quality of data is more important than ever. As researchers increasingly rely on digital data sources like social media, web scraping, and mobile applications, it is crucial to understand the challenges that come with using such data. This research explores the various dimensions of data quality, including accuracy, completeness, consistency, and validity, and identifies the key issues researchers face in these areas. One of the major concerns is the presence of bias, noise, and the representativeness of digital data, which can significantly impact the reliability of findings.
 
 To address these challenges, we discuss effective strategies for improving data quality, such as data cleaning, validation techniques, and triangulating with traditional research methods. Transparency in data collection and analysis is essential, and researchers must disclose their methodologies and data sources to ensure trustworthiness. Ethical considerations, particularly regarding privacy, consent, and data ownership, are also critical when working with digital data.
 
 Looking forward, this research calls for the development of standardized metrics and guidelines to assess data quality in digital social research. An interdisciplinary approach, combining insights from social science, computer science, and data ethics, is needed to navigate the complexities of digital data. By improving data quality assessment frameworks, we aim to provide researchers with the tools they need to conduct more reliable and ethical digital social research."),
-                      
+
                       h2(id = "decision_tree", "Decision Tree"),
-                      p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about. 
-                      They are sorted by Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers.", br(),  
-                        "Secondly, you can filter the papers based on their perspective on the subject, which is sorted into Data, User, Data and User, Analytical frames and Challenges.", br(),  
-                        "Lastly, you can filter the papers based on their granularity, which is binary at 1 or 2.", br(),  
+                      p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about.
+                      They are sorted by Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers.", br(),
+                        "Secondly, you can filter the papers based on their perspective on the subject, which is sorted into Data, User, Data and User, Analytical frames and Challenges.", br(),
+                        "Lastly, you can filter the papers based on their granularity, which is binary at 1 or 2.", br(),
                         "After having chosen what factors to filter the papers by, you can download the selection as a BibTeX file for citation.")
                ),
-               
-               
-               column(4,
+
+
+               column(2,
                       wellPanel(
                         tags$head(
                           tags$style(HTML("
@@ -148,20 +97,84 @@ Looking forward, this research calls for the development of standardized metrics
                         )
                       )
                )
-               
-               
-               
+
+
+
              )
            )
+  ),
+  # Decision Tree Tab
+  tabPanel("Decision Tree",
+           div(
+             style = "width: 100%; text-align: center; margin-bottom: 20px;",
+             h2("Desicion Tree"),
+             div("The desicion tree helps you to identify relevant data quality frameworks for a specific research context", style = "font-size: 14px;")
+           ),
+           fluidPage(
+             fluidRow(
+               column(4,
+                      div(class = "bar-chart", plotOutput("bar_chart")),
+                      div(class = "paper-count", uiOutput("paper_count"))
+
+               ),
+               column(8,
+                      div(
+                        class = "decision-tree-panel",
+                        helpText("Filter the list of Data Quality Frameworks using the drop-down filters below:"),
+                        div(style="border: 1px solid #ccc; background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;",
+                            fluidRow(
+                              column(4,
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         selectInput("col_datatype", "Datatype:", choices = c("","Untargeted", "Social Media Data", "Visual Data", "Survey Data", "Sensor Data", "Register Data")),
+                                         actionButton("clear_datatype", "Clear")
+                                     )
+                              ),
+                              column(4,
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         selectInput("col_perspective", "Perspective:", choices = c("", "extrinsic", "intrinsic")),
+                                         actionButton("clear_perspective", "Clear")
+                                     )
+                              ),
+                              column(4,
+                                     div(style="display: flex; flex-direction: column; align-items: center;",
+                                         selectInput("col_granularity", "Granularity:", choices = c("", "general", "specific")),
+
+                                         actionButton("clear_granularity", "Clear")
+                                     )
+                              )
+                            )
+                        )
+                      ),
+                      downloadButton("download_bibtex", "Download as BibTeX"),
+
+                      DT::DTOutput("recommendations_table")
+               )
+             )
+           )
+  ),
+
+
+  tabPanel("Evidence Gap Map",
+           div(
+             style = "width: 100%; text-align: center; margin-bottom: 20px;",
+             h2("Evidence Gap Map"),
+             div("The evidence gap map highlights the social science data types and quality dimensions which are already addressed in the available frameworks.", style = "font-size: 14px;")
+           ),
+           tags$iframe(
+             src = "map_final.html",
+             width = "100%",
+             height = "1000px",
+             style = "border:none; overflow:auto;"
+           )
   )
-  
+
   )
 
 
 
 # Define Server
 server <- function(input, output, session) {
-  
+
   # Reactive dataset filtering
   filtered_data <- reactive({
     dt_data %>%
@@ -183,9 +196,9 @@ server <- function(input, output, session) {
           (input$col_granularity == "" | dummy_granularity == input$col_granularity)
       )
   })
-  
-  
-  
+
+
+
 
   # Table Output
   output$recommendations_table <- renderDataTable({
@@ -198,8 +211,8 @@ server <- function(input, output, session) {
       dplyr::select(Title = meta_title, Authors = meta_authors, Link = meta_doi) %>%
       datatable(escape = FALSE, options = list(pageLength = 10))
   })
-  
-  
+
+
   # Bar Chart 1: Data Type Distribution with Granularity
   output$bar_chart <- renderPlot({
     # Get the filtered dataset based on decision tree
@@ -211,15 +224,15 @@ server <- function(input, output, session) {
       filter(value == 1) %>%
       mutate(granularity = factor(ifelse(dummy_granularity == "specific", "Specific", "General"), levels = c("General", "Specific"))) %>%
       count(datatype, granularity)
-    
+
     # Fix the order of 'datatype' factor and reverse it
     data_long$datatype <- factor(data_long$datatype, levels = c("Sensor Data", "Social Media Data", "Register Data", "Untargeted", "Survey Data"))
-    
+
     # Prevent ggplot errors when no data is available
     if (nrow(data_long) == 0) {
       return(NULL)
     }
-    
+
     # Plot the bar chart with fixed and reversed order of data types
     ggplot(data_long, aes(x = datatype, y = n, fill = interaction(datatype, granularity, sep = "."))) +
       geom_bar(stat = "identity", position = "stack") +
@@ -236,32 +249,32 @@ server <- function(input, output, session) {
       labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
       theme(legend.position = "none")  # Remove the legend
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   # Paper Count Display
   output$paper_count <- renderUI({
     count <- nrow(filtered_data())  # Get the number of filtered papers
-    
+
     div(style = "border: 2px solid black; padding: 20px; border-radius: 10px; text-align: center; width: 200px; margin: auto;",
         div(style = "font-size: 40px; font-weight: bold;", count),
-        div(style = "font-size: 14px; color: grey; margin-top: 5px;", "Papers Selected")
+        div(style = "font-size: 14px; color: grey; margin-top: 5px;", "Papers Found")
     )
   })
-   
-  
-  
+
+
+
   # Download BibTeX
   output$download_bibtex <- downloadHandler(
     filename = function() { paste("recommendations_", Sys.Date(), ".bib", sep = "") },
@@ -271,14 +284,14 @@ server <- function(input, output, session) {
         doi <- if ("DOI" %in% colnames(dt_data)) row["DOI"] else "No DOI"
         id <- if ("ID" %in% colnames(dt_data)) row["ID"] else paste0("entry", sample(1000:9999, 1))
         title <- if ("Title" %in% colnames(dt_data)) row["Title"] else "Untitled"
-        
+
         paste0(
-          "@article{", 
-          id, ",\n",  
+          "@article{",
+          id, ",\n",
           "  author = {", authors, "},\n",
-          "  title = {", title, "},\n",  
-          "  journal = {No journal information},\n",  
-          "  year = {No year information},\n",  
+          "  title = {", title, "},\n",
+          "  journal = {No journal information},\n",
+          "  year = {No year information},\n",
           "  doi = {", doi, "}\n",
           "}\n"
         )
@@ -286,7 +299,7 @@ server <- function(input, output, session) {
       writeLines(bibtex_entries, file)
     }
   )
-  
+
   # Reset selection buttons
   observeEvent(input$clear_datatype, {
     updateSelectInput(session, "col_datatype", selected = "")
