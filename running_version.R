@@ -6,9 +6,9 @@ library(ggplot2)
 library(DT)
 library(tidyverse)
 
-#Things to do/ to fix. 
+#Things to do/ to fix.
 # 1.Granularity legend for bar chart
-# 2. Add Gesis colors. 
+# 2. Add Gesis colors.
 
 
 
@@ -97,9 +97,8 @@ Looking forward, this research calls for the development of standardized metrics
                         h4("Table of Contents", style = "font-size: 16px; font-weight: bold;"),
                         tags$ul(class = "toc-list",
                                 tags$li(tags$a(href = "#introduction", "1. Introduction")),
-                                tags$li(tags$a(href = "#project_description", "2. Project Description")),
-                                tags$li(tags$a(href = "#paper_description", "3. Paper Description")),
-                                tags$li(tags$a(href = "#decision_tree", "4. Decision Tree"))
+                                tags$li(tags$a(href = "#paper_description", "2. Paper Description")),
+                                tags$li(tags$a(href = "#decision_tree", "3. Decision Tree"))
                         )
                       )
                )
