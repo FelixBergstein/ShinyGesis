@@ -6,6 +6,12 @@ library(ggplot2)
 library(DT)
 library(tidyverse)
 
+#Things to do/ to fix. 
+# 1.Granularity legend for bar chart
+# 2. Add Gesis colors. 
+
+
+
 # Load Data
 dt_data <- read_excel("data/data_v2.xlsx") |> 
   rename("Untargeted"= dtype_untargeted,
