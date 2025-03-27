@@ -64,6 +64,15 @@ ui <- navbarPage(
            )
   ),
   
+  
+  tabPanel("Evidence Gap Map",
+           tags$iframe(
+             src = "map_final.html",
+             width = "100%",
+             height = "1000px",
+             style = "border:none; overflow:auto;"
+           )
+  ),
   # Background Tab
   tabPanel("Background",
            fluidPage(
@@ -139,12 +148,13 @@ Looking forward, this research calls for the development of standardized metrics
                         )
                       )
                )
-              
                
                
-               )
+               
              )
            )
+  )
+  
   )
 
 
