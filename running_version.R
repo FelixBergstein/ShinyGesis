@@ -26,7 +26,7 @@ dt_data <- read_excel("data/data_v2.xlsx") |>
 ui <- navbarPage(
   title = "Data Quality",
   # Background Tab
-  tabPanel("Background",
+  tabPanel(tags$span(style = "color: #920948;", "Background"),
            fluidPage(
              tags$head(
                tags$style(HTML("
@@ -37,21 +37,21 @@ ui <- navbarPage(
              ),
              fluidRow(
                column(10,
-                      h1(id = "introduction", "Welcome"),
+                      h1(id = "introduction", style = "color: #1E8CC8;", "Welcome"),
                       p("This app provides tools that you can use to
 
 
                         project provides a comprehensive analysis of data quality in digital social research, highlighting the challenges and strategies involved in ensuring reliable results. It features a decision tree that allows users to filter and download relevant papers cited in the research. The decision tree makes it easy to explore the 53 papers referenced in the study based on specific criteria, including datatype, perspective, and granularity. Whether you're a researcher looking for targeted insights or simply interested in understanding the state of digital social research, this tool offers a convenient way to navigate through the literature. The papers available for download are organized to meet the needs of various research contexts."),
 
 
-                      h2(id = "paper_description", "Paper Description"),
+                      h2(id = "paper_description", style = "color: #1E8CC8;", "Paper Description"),
                       p("In the age of digital social research, ensuring the quality of data is more important than ever. As researchers increasingly rely on digital data sources like social media, web scraping, and mobile applications, it is crucial to understand the challenges that come with using such data. This research explores the various dimensions of data quality, including accuracy, completeness, consistency, and validity, and identifies the key issues researchers face in these areas. One of the major concerns is the presence of bias, noise, and the representativeness of digital data, which can significantly impact the reliability of findings.
 
 To address these challenges, we discuss effective strategies for improving data quality, such as data cleaning, validation techniques, and triangulating with traditional research methods. Transparency in data collection and analysis is essential, and researchers must disclose their methodologies and data sources to ensure trustworthiness. Ethical considerations, particularly regarding privacy, consent, and data ownership, are also critical when working with digital data.
 
 Looking forward, this research calls for the development of standardized metrics and guidelines to assess data quality in digital social research. An interdisciplinary approach, combining insights from social science, computer science, and data ethics, is needed to navigate the complexities of digital data. By improving data quality assessment frameworks, we aim to provide researchers with the tools they need to conduct more reliable and ethical digital social research."),
 
-                      h2(id = "decision_tree", "Decision Tree"),
+                      h2(id = "decision_tree", style = "color: #1E8CC8;", "Decision Tree"),
                       p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about.
                       They are sorted by Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers.", br(),
                         "Secondly, you can filter the papers based on their perspective on the subject, which is sorted into Data, User, Data and User, Analytical frames and Challenges.", br(),
@@ -244,12 +244,12 @@ server <- function(input, output, session) {
       coord_flip() +  # Flip bars for better readability
       theme_minimal() +
       scale_fill_manual(values = c(
-        "Untargeted.General" = "#FEE0D2", "Untargeted.Specific" = "#FBB4AE",
-        "Social Media Data.General" = "#CCE1F2", "Social Media Data.Specific" = "#B3CDE3",
-        "Register Data.General" = "#EADAF2", "Register Data.Specific" = "#DECBE4",
-        "Survey Data.General" = "#FFE6BF", "Survey Data.Specific" = "#FED9A6",
-        "Sensor Data.General" = "#FFFFE0", "Sensor Data.Specific" = "#FFFFCC",
-        "Visual Data.General" = "#F2E6D2", "Visual Data.Specific" = "#E5D8BD"
+        "Untargeted.General" = "#ffc3e0", "Untargeted.Specific" = "#d20064",
+        "Social Media Data.General" = "#e5cbed", "Social Media Data.Specific" = "#642878",
+        "Register Data.General" = "#e2f2fb", "Register Data.Specific" = "#1e8cc8",
+        "Survey Data.General" = "#deebf7", "Survey Data.Specific" = "#003c78",
+        "Sensor Data.General" = "#C7E2F1", "Sensor Data.Specific" = "#105F94",
+        "Visual Data.General" = "#ED99C1", "Visual Data.Specific" = "#920948"
       )) +
       labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
       theme(legend.position = "none")  # Remove the legend
