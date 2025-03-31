@@ -13,7 +13,7 @@ library(tidyverse)
 
 
 # Load Data
-dt_data <- read_excel("data/data_v2.xlsx") |>
+dt_data <- read_excel("data/data_v3.xlsx") |>
   rename("Untargeted"= dtype_untargeted,
     "Survey Data" = dtype_survey ,
           "Sensor Data" = dtype_sensor,
@@ -26,7 +26,7 @@ dt_data <- read_excel("data/data_v2.xlsx") |>
 ui <- navbarPage(
   title = "Data Quality",
   # Background Tab
-  tabPanel(tags$span(style = "color: #920948;", "Background"),
+  tabPanel(tags$span(style = "color: #920948;", tags$b("Background")),
            fluidPage(
              tags$head(
                tags$style(HTML("
@@ -109,16 +109,16 @@ Looking forward, this research calls for the development of standardized metrics
            )
   ),
   # Decision Tree Tab
-  tabPanel("Decision Tree",
+  tabPanel(tags$span(style = "color: #920948;", tags$b("Decision Tree")),
            div(
              style = "width: 100%; text-align: center; margin-bottom: 20px;",
-             h2("Desicion Tree"),
+             h2( style = "color: #1E8CC8;", "Desicion Tree"),
              div("The desicion tree helps you to identify relevant data quality frameworks for a specific research context", style = "font-size: 14px;")
            ),
            fluidPage(
              fluidRow(
                column(4,
-                      div(class = "bar-chart", plotOutput("bar_chart")),
+                      div(class = "bar-chart", plotOutput("bar_chart"), uiOutput("bar_chart_desc")),
                       div(class = "paper-count", uiOutput("paper_count"))
 
                ),
@@ -151,6 +151,7 @@ Looking forward, this research calls for the development of standardized metrics
                         )
                       ),
                       downloadButton("download_bibtex", "Download as BibTeX"),
+                      br(), br(),
 
                       DT::DTOutput("recommendations_table")
                )
@@ -159,10 +160,10 @@ Looking forward, this research calls for the development of standardized metrics
   ),
 
 
-  tabPanel("Evidence Gap Map",
+  tabPanel(tags$span(style = "color: #920948;", tags$b("Evidence Gap Map")),
            div(
              style = "width: 100%; text-align: center; margin-bottom: 20px;",
-             h2("Evidence Gap Map"),
+             h2( style = "color: #1E8CC8;", "Evidence Gap Map"),
              div("The evidence gap map highlights the social science data types and quality dimensions which are already addressed in the available frameworks.", style = "font-size: 14px;")
            ),
            tags$iframe(
@@ -218,7 +219,6 @@ server <- function(input, output, session) {
   })
 
 
-  # Bar Chart 1: Data Type Distribution with Granularity
   output$bar_chart <- renderPlot({
     # Get the filtered dataset based on decision tree
     data_long <- filtered_data() %>%
@@ -247,13 +247,19 @@ server <- function(input, output, session) {
         "Untargeted.General" = "#ffc3e0", "Untargeted.Specific" = "#d20064",
         "Social Media Data.General" = "#e5cbed", "Social Media Data.Specific" = "#642878",
         "Register Data.General" = "#e2f2fb", "Register Data.Specific" = "#1e8cc8",
-        "Survey Data.General" = "#deebf7", "Survey Data.Specific" = "#003c78",
+        "Survey Data.General" = "#A5D1E9", "Survey Data.Specific" = "#003c78",
         "Sensor Data.General" = "#C7E2F1", "Sensor Data.Specific" = "#105F94",
         "Visual Data.General" = "#ED99C1", "Visual Data.Specific" = "#920948"
       )) +
       labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
       theme(legend.position = "none")  # Remove the legend
   })
+
+  # Render the description below the chart
+  output$bar_chart_desc <- renderUI({
+    HTML("<p style='text-align: center; font-size: 14px; color: gray;'>Darker colors indicate specific granularity, lighter colors general granularity.</p>")
+  })
+
 
 
 
@@ -282,28 +288,20 @@ server <- function(input, output, session) {
 
   # Download BibTeX
   output$download_bibtex <- downloadHandler(
-    filename = function() { paste("recommendations_", Sys.Date(), ".bib", sep = "") },
+    filename = function() {
+      "references.bib"
+    },
     content = function(file) {
-      bibtex_entries <- apply(filtered_data(), 1, function(row) {
-        authors <- if ("Authors" %in% colnames(dt_data)) row["Authors"] else "Unknown"
-        doi <- if ("DOI" %in% colnames(dt_data)) row["DOI"] else "No DOI"
-        id <- if ("ID" %in% colnames(dt_data)) row["ID"] else paste0("entry", sample(1000:9999, 1))
-        title <- if ("Title" %in% colnames(dt_data)) row["Title"] else "Untitled"
+      bibtex_data <- filtered_data() %>%
+        select(bibtex) %>%
+        mutate(bibtex = paste0("@", bibtex))  # Add @ manually
 
-        paste0(
-          "@article{",
-          id, ",\n",
-          "  author = {", authors, "},\n",
-          "  title = {", title, "},\n",
-          "  journal = {No journal information},\n",
-          "  year = {No year information},\n",
-          "  doi = {", doi, "}\n",
-          "}\n"
-        )
-      })
-      writeLines(bibtex_entries, file)
+      writeLines(bibtex_data$bibtex, file)
     }
   )
+
+
+
 
   # Reset selection buttons
   observeEvent(input$clear_datatype, {
