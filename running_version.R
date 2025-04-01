@@ -25,6 +25,45 @@ dt_data <- read_excel("data/data_v3.xlsx") |>
 # Define UI
 ui <- navbarPage(
   title = "Data Quality",
+
+  # Custom CSS for navbar hover effects
+  header = tags$head(
+    tags$style(HTML("
+    /* Set the entire navbar background to white */
+    .navbar {
+      background-color: white !important;
+    }
+
+    /* Ensure navbar title remains black */
+    .navbar-brand {
+      color: black !important;
+    }
+
+    /* Style all tabs normally */
+    .navbar-nav .nav-item .nav-link {
+      color: black !important;
+      padding: 10px 15px;
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+
+    /* Hover effect: change background color and keep text black */
+    .navbar-nav .nav-item .nav-link:hover {
+      background-color: #f4d4e1 !important; /* Light pink */
+      color: black !important;
+      border-radius: 5px;
+    }
+
+    /* Active tab: different background color with white text */
+    .navbar-nav .nav-item .active {
+      background-color: #d20064 !important;
+      color: white !important;
+      border-radius: 5px;
+    }
+  "))
+  ),
+
+
+
   # Background Tab
   tabPanel(tags$span(style = "color: #920948;", tags$b("Background")),
            fluidPage(
@@ -36,7 +75,7 @@ ui <- navbarPage(
                "))
              ),
              fluidRow(
-               column(10,
+               column(5, offset = 3,
                       h1(id = "introduction", style = "color: #1E8CC8;", "Welcome"),
                       p("This app provides tools that you can use to
 
@@ -52,12 +91,49 @@ To address these challenges, we discuss effective strategies for improving data 
 Looking forward, this research calls for the development of standardized metrics and guidelines to assess data quality in digital social research. An interdisciplinary approach, combining insights from social science, computer science, and data ethics, is needed to navigate the complexities of digital data. By improving data quality assessment frameworks, we aim to provide researchers with the tools they need to conduct more reliable and ethical digital social research."),
 
                       h2(id = "decision_tree", style = "color: #1E8CC8;", "Decision Tree"),
-                      p("The decision tree allows you to filter the 53 cited papers according to your needs. Firstly, you may filter based on what Datatype the work is about.
-                      They are sorted by Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers.", br(),
-                        "Secondly, you can filter the papers based on their perspective on the subject, which is sorted into Data, User, Data and User, Analytical frames and Challenges.", br(),
-                        "Lastly, you can filter the papers based on their granularity, which is binary at 1 or 2.", br(),
-                        "After having chosen what factors to filter the papers by, you can download the selection as a BibTeX file for citation.")
+                      p("The decision tree allows you to filter the 58 cited papers according to your needs. The steps are the following: "),
+
+                       tags$ol(
+                        tags$li("Filter by what", tags$b("Data Type"), "the publications are about.", tags$br(), "They are sorted into Register, Sensor, Social Media, Survey and Text data, as well as untargeted papers", tags$br(),tags$br()),
+                        tags$li("Filter the publications based on their", tags$b("Perspective"), "on the subject.", tags$br(), "They are sorted into Data, User, Data and User, Analytical frames and Challenges.", tags$br(),tags$br()),
+                        tags$li("Lastly, you can filter the papers based on their ", tags$b("Granularity."), tags$br(), "They are sorted into general and specific.")
+                      ),
+
+                      p("After having chosen what factors to filter the papers by, you can download the selection as a BibTeX file for citation."),
+
+               h2(id = "evidence_gap_map", style = "color: #1E8CC8;", "Evidence Gap Map"),
+               p("The Evidenve Gap Map illustrates to what extent which papers discuss different types of Errors, based on their Data Type. The Errors covered by the Map are:"),
+
+               tags$ul(
+                 tags$li(
+                   tags$b("Representation"), "Errors",
+                   tags$ul(
+                     tags$li("Coverage Error"),
+                     tags$li("Sampling Error"),
+                     tags$li("Nonresponse Error")
+                   )
+                 ),
+                 tags$li(
+                   tags$b("Measurement"), "Errors",
+                   tags$ul(
+                     tags$li("Content Validity Error"),
+                     tags$li("Measurement Error Response"),
+                     tags$li("Measurement Error Platform"),
+                     tags$li("Preprocessing Error")
+
+                   )
+                 ),
+                 tags$li(
+                   tags$b("Modelling"), "Errors",
+                 )
                ),
+
+               p("The Circle Size indicates the number of publications covering each type of Error. The exact amount is shows when hovering over the circle."),
+
+               ),
+
+
+
 
 
                column(2,
@@ -94,11 +170,12 @@ Looking forward, this research calls for the development of standardized metrics
              }
            "))
                         ),
-                        h4("Table of Contents", style = "font-size: 16px; font-weight: bold;"),
+                        h4("Table of Contents", style = "font-size: 16px; color: #1E8CC8"),
                         tags$ul(class = "toc-list",
                                 tags$li(tags$a(href = "#introduction", "1. Introduction")),
                                 tags$li(tags$a(href = "#paper_description", "2. Paper Description")),
-                                tags$li(tags$a(href = "#decision_tree", "3. Decision Tree"))
+                                tags$li(tags$a(href = "#decision_tree", "3. Decision Tree")),
+                                tags$li(tags$a(href = "#evidence_gap_map", "4. Evidence Gap Map"))
                         )
                       )
                )
@@ -119,7 +196,8 @@ Looking forward, this research calls for the development of standardized metrics
              fluidRow(
                column(4,
                       div(class = "bar-chart", plotOutput("bar_chart"), uiOutput("bar_chart_desc")),
-                      div(class = "paper-count", uiOutput("paper_count"))
+                      div(class = "paper-count", uiOutput("paper_count"),
+                          style = "margin-top: 100px;")
 
                ),
                column(8,
@@ -252,7 +330,9 @@ server <- function(input, output, session) {
         "Visual Data.General" = "#ED99C1", "Visual Data.Specific" = "#920948"
       )) +
       labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
-      theme(legend.position = "none")  # Remove the legend
+      theme(legend.position = "none",  # Remove the legend
+            plot.title = element_text(size = 19)
+)
   })
 
   # Render the description below the chart
