@@ -48,7 +48,7 @@ ui <- tagList(
   ),
 
   navbarPage(
-    title = "Data Quality",
+    title = "Data Quality Frameworks",
     id = "main_navbar",  # Enable tab switching
 
     tabPanel(tags$span(style = "color: #920948;", tags$b("Background")),
@@ -60,17 +60,15 @@ ui <- tagList(
                  column(8,
                         h1(id = "introduction", style = "color: #1E8CC8;", "Welcome"),
                         p(HTML(
-                          'This app provides tools that you can use to explore data quality in digital social research.
-  It features a <strong>Decision Tree</strong> and an <strong>Evidence Gap Map</strong> to help you filter and review 58 cited papers based on criteria such as data type, perspective, and granularity.'
+                          '
+                          This app provides tools that you can use to explore data quality frameworks for social science research. It features an interactive <strong>Decision Tree</strong> and an <strong>Evidence Gap Map</strong> to help you filter and review frameworks based on fine-grained criteria.'
                         ))
                         ,
 
-                        h2(id = "paper_description", style = "color: #1E8CC8;", "Paper Description"),
-                        p("In the age of digital social research, ensuring the quality of data is more important than ever. As researchers increasingly rely on digital data sources like social media, web scraping, and mobile applications, it is crucial to understand the challenges that come with using such data. This research explores the various dimensions of data quality, including accuracy, completeness, consistency, and validity, and identifies the key issues researchers face in these areas. One of the major concerns is the presence of bias, noise, and the representativeness of digital data, which can significantly impact the reliability of findings.
-
-To address these challenges, we discuss effective strategies for improving data quality, such as data cleaning, validation techniques, and triangulating with traditional research methods. Transparency in data collection and analysis is essential, and researchers must disclose their methodologies and data sources to ensure trustworthiness. Ethical considerations, particularly regarding privacy, consent, and data ownership, are also critical when working with digital data.
-
-Looking forward, this research calls for the development of standardized metrics and guidelines to assess data quality in digital social research. An interdisciplinary approach, combining insights from social science, computer science, and data ethics, is needed to navigate the complexities of digital data. By improving data quality assessment frameworks, we aim to provide researchers with the tools they need to conduct more reliable and ethical digital social research."),
+                        h2(id = "paper_description", style = "color: #1E8CC8;", "Empirical Foundation: Systematic Review"),
+                        p(HTML("This collection of data quality frameworks is based on a systematic review outlined in        <a href='https://journals.sagepub.com/doi/10.1177/08944393241245395' target='_blank'>Daikeler et al. (2024)</a>.
+. The study was driven by the growing use of digital behavioral data alongside traditional sources like survey data in social science research, which introduces various data quality challenges.
+To guide researchers, Daikeler et al. conducted a systematic literature review and identified 58 frameworks that address issues of data quality. In addition to a comprehensive discussion of general challenges related to data quality, the paper introduces two tools: a decision tree that helps distinguish between characteristics such as the type of data, the quality dimension targeted by the framework, and the level of granularity; and an evidence gap map that evaluates the types of errors discussed in the frameworks and highlights gaps in knowledge for specific research contexts.")),
 
                         tabsetPanel(
                           tabPanel("Decision Tree",
@@ -79,23 +77,27 @@ Looking forward, this research calls for the development of standardized metrics
                                      h3(style = "color: #1E8CC8;", "How to use the Decision Tree"),
                                      tags$p(HTML(
                                        "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_tree'>Decision Tree</span> serves as an initial guide to navigating through the various data quality frameworks.
-
-        Since decision trees are commonly utilized to facilitate decision-making in complex and high-dimensional scenarios, they enable researchers to choose frameworks that best suit their specific research problem."
+             Since decision trees are commonly utilized to facilitate decision-making in complex and high-dimensional scenarios, they enable researchers to choose frameworks that best suit their specific research problem."
                                      )),
                                      br(),
                                      tags$ol(
-                                       tags$li(tags$b("Data Type:"), " Register, Sensor, Social Media, Survey, Text, or Untargeted"),
-                                       tags$li(tags$b("Perspective:"), " Data-centric, User-centric, Combined, Analytical frames, or Challenges"),
-                                       tags$li(tags$b("Granularity:"), " General or Specific")
+                                       tags$li(tags$b("Data Type:"), " Register Data, Sensor Data, Social Media Data, Survey Data, or Untargeted"),
+                                       tags$li(tags$b("Perspective:"), " Extrinsic (“data is usable”) or Intrinsic (“data is accurate”)"),
+                                       tags$li(tags$b("Granularity:"), " General (broader discussions around the various aspects of data quality) or Specific (detailed and practical focus)")
                                      ),
-                                     p("Once filtered, you can download selected citations as a BibTeX file.")
+                                     p("Once filtered, you can download selected frameworks as a BibTeX file.")
                                    )
-                          ),
+                          )
+                          ,
                           tabPanel("Evidence Gap Map",
                                    tags$div(
                                      style = "padding-top: 10px;",
                                      h3(style = "color: #1E8CC8;", "How to use the Evidence Gap Map"),
-                                     tags$p(HTML("The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_map'>Evidence Gap Map</span> serves as a detailed guide of error sources and data types targeted by the (intrinsic) data quality frameworks. It presents the selected error types for social science data on the y-axis, mapping them against selected data types on the x-axis. The size of the bubble represents how many frameworks include the respective error source by data type. The errors covered are:")),
+                                     tags$p(HTML(
+                                       "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_map'>Evidence Gap Map</span> serves as a detailed guide of error sources and data types targeted by the (intrinsic) data quality frameworks.
+             It presents the selected error types for social science data on the y-axis, mapping them against selected data types on the x-axis.
+             The size of the bubble represents how many frameworks include the respective error source by data type. The errors covered are:"
+                                     )),
                                      tags$ul(
                                        tags$li(tags$b("Representation Errors"), tags$ul(
                                          tags$li("Coverage Error"),
@@ -121,7 +123,6 @@ Looking forward, this research calls for the development of standardized metrics
                )
              )
     ),
-
     tabPanel(tags$span(style = "color: #920948;", tags$b("Decision Tree")),
              value = "decision_tree",
              div(
@@ -154,6 +155,8 @@ Looking forward, this research calls for the development of standardized metrics
                               )
                             )
                         ),
+                        br(),
+
                         downloadButton("download_bibtex", "Download as BibTeX"),
                         br(), br(),
                         DT::DTOutput("recommendations_table")
@@ -203,12 +206,31 @@ server <- function(input, output, session) {
   })
 
   output$recommendations_table <- renderDataTable({
-    filtered_data() %>%
-      mutate(meta_doi = ifelse(!is.na(meta_doi) & meta_doi != "",
-                               paste0("<a href='https://doi.org/", meta_doi, "' target='_blank'>", meta_doi, "</a>"), NA)) %>%
-      select(Title = meta_title, Authors = meta_authors, Link = meta_doi) %>%
-      datatable(escape = FALSE, options = list(pageLength = 10))
+    datatable(
+      filtered_data() %>%
+        mutate(meta_doi = ifelse(!is.na(meta_doi) & meta_doi != "",
+                                 paste0("<a href='", meta_doi, "' target='_blank'>", meta_doi, "</a>"), NA)) %>%
+        select(Title = meta_title, Authors = meta_authors, Outlet = meta_publisher, Link = meta_doi),
+      rownames = FALSE,
+      escape = FALSE,
+      options = list(
+        pageLength = 10,
+        width = '100%',  # <-- Add this
+        columnDefs = list(
+          list(targets = "_all", width = '25%'),
+          list(
+            targets = 3,  # 'Link' column (0-based index, so 4th column = 3)
+            render = JS(
+              "function(data, type, row, meta) {",
+              "  return '<div style=\"white-space: normal; overflow-wrap: anywhere; max-width: 200px;\">' + data + '</div>';",
+              "}"
+            )
+          )
+        )
+      )
+    )
   })
+
 
   output$bar_chart <- renderPlot({
     data_long <- filtered_data() %>%
@@ -236,12 +258,12 @@ server <- function(input, output, session) {
         "Sensor Data.General" = "#C7E2F1", "Sensor Data.Specific" = "#105F94",
         "Visual Data.General" = "#ED99C1", "Visual Data.Specific" = "#920948"
       )) +
-      labs(title = "Distribution of Data Types with Granularity", x = "Data Type", y = "Count") +
-      theme(legend.position = "none", plot.title = element_text(size = 19))
+      labs(title = "Distribution of Data Types", x = "Data Type", y = "Count") +
+      theme(legend.position = "none", plot.title = element_text(size = 17))
   })
 
   output$bar_chart_desc <- renderUI({
-    HTML("<p style='text-align: center; font-size: 14px; color: gray;'>Darker colors = Specific; Lighter colors = General granularity</p>")
+    HTML("<p style='text-align: center; font-size: 14px; color: gray;'>Darker colors = Specific Granularity; Lighter colors = General Granularity</p>")
   })
 
   output$paper_count <- renderUI({
