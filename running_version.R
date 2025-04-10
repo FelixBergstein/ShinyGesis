@@ -48,7 +48,7 @@ ui <- tagList(
   ),
 
   navbarPage(
-    title = "Data Quality Frameworks",
+    title = "Data Quality",
     id = "main_navbar",  # Enable tab switching
 
     tabPanel(tags$span(style = "color: #920948;", tags$b("Background")),
@@ -66,9 +66,8 @@ ui <- tagList(
                         ,
 
                         h2(id = "paper_description", style = "color: #1E8CC8;", "Empirical Foundation: Systematic Review"),
-                        p(HTML("This collection of data quality frameworks is based on a systematic review outlined in        <a href='https://journals.sagepub.com/doi/10.1177/08944393241245395' target='_blank'>Daikeler et al. (2024)</a>.
-. The study was driven by the growing use of digital behavioral data alongside traditional sources like survey data in social science research, which introduces various data quality challenges.
-To guide researchers, Daikeler et al. conducted a systematic literature review and identified 58 frameworks that address issues of data quality. In addition to a comprehensive discussion of general challenges related to data quality, the paper introduces two tools: a decision tree that helps distinguish between characteristics such as the type of data, the quality dimension targeted by the framework, and the level of granularity; and an evidence gap map that evaluates the types of errors discussed in the frameworks and highlights gaps in knowledge for specific research contexts.")),
+                        p(HTML("This collection of data quality frameworks is based on a systematic review outlined in        <a href='https://journals.sagepub.com/doi/10.1177/08944393241245395' target='_blank'>Daikeler et al. (2024)</a>. The study was driven by the growing use of digital behavioral data alongside traditional sources like survey data in social science research, which introduces various data quality challenges.
+To guide researchers, Daikeler et al. conducted a systematic literature review and identified 58 frameworks that address issues of data quality. In addition to a comprehensive discussion of general challenges related to data quality, the paper introduces two tools: (1) A <strong>Decision Tree</strong> that helps researchers to identify the appropriate data quality framework for their individual research use case, and (2) An <strong>Evidence Gap Map</strong>p that evaluates the types of errors discussed in the frameworks and highlights gaps in knowledge for specific research contexts.")),
 
                         tabsetPanel(
                           tabPanel("Decision Tree",
@@ -76,7 +75,7 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
                                      style = "padding-top: 10px;",
                                      h3(style = "color: #1E8CC8;", "How to use the Decision Tree"),
                                      tags$p(HTML(
-                                       "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_tree'>Decision Tree</span> serves as an initial guide to navigating through the various data quality frameworks.
+                                       "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_tree'>Decision Tree</span> serves as an initial guide to select appropriate data quality frameworks for different use cases.
              Since decision trees are commonly utilized to facilitate decision-making in complex and high-dimensional scenarios, they enable researchers to choose frameworks that best suit their specific research problem."
                                      )),
                                      br(),
@@ -128,14 +127,15 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
              div(
                style = "width: 100%; text-align: center; margin-bottom: 20px;",
                h2(style = "color: #1E8CC8;", "Decision Tree"),
-               div("The decision tree helps you to identify relevant data quality frameworks for a specific research context", style = "font-size: 14px;")
+               div("The Decision Tree helps you to identify the appropriate data quality framework for your individual research use case", style = "font-size: 14px;")
              ),
              fluidPage(
                fluidRow(
                  column(4,
+                        uiOutput("paper_count", style = "margin-bottom: 20px;"),
+
                         plotOutput("bar_chart"),
-                        uiOutput("bar_chart_desc"),
-                        uiOutput("paper_count", style = "margin-top: 100px;")
+                        uiOutput("bar_chart_desc")
                  ),
                  column(8,
                         helpText("Filter the list using the dropdowns below:"),
@@ -170,7 +170,7 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
              div(
                style = "width: 100%; text-align: center; margin-bottom: 20px;",
                h2(style = "color: #1E8CC8;", "Evidence Gap Map"),
-               div("The evidence gap map shows which quality dimensions are covered for social science data types.", style = "font-size: 14px;")
+               div("The Evidence Gap Map helps you to evaluate the types of errors discussed in the frameworks and highlights gaps of research", style = "font-size: 14px;")
              ),
              tags$iframe(
                src = "map_final.html",
@@ -259,7 +259,7 @@ server <- function(input, output, session) {
         "Visual Data.General" = "#ED99C1", "Visual Data.Specific" = "#920948"
       )) +
       labs(title = "Distribution of Data Types", x = "Data Type", y = "Count") +
-      theme(legend.position = "none", plot.title = element_text(size = 17))
+      theme(legend.position = "none", plot.title = element_text(size = 13, face = "bold"))
   })
 
   output$bar_chart_desc <- renderUI({
@@ -270,7 +270,7 @@ server <- function(input, output, session) {
     count <- nrow(filtered_data())
     div(style = "border: 2px solid black; padding: 20px; border-radius: 10px; text-align: center; width: 200px; margin: auto;",
         div(style = "font-size: 40px; font-weight: bold;", count),
-        div(style = "font-size: 14px; color: grey; margin-top: 5px;", "Papers Found"))
+        div(style = "font-size: 14px; color: grey; margin-top: 0px;", "Papers Found"))
   })
 
   output$download_bibtex <- downloadHandler(
