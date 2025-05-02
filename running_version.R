@@ -60,64 +60,67 @@ ui <- tagList(
                  column(8,
                         h1(id = "introduction", style = "color: #1E8CC8;", "Welcome"),
                         p(HTML(
-                          '
-                          This app provides tools that you can use to explore data quality frameworks for social science research. It features an interactive <strong>Decision Tree</strong> and an <strong>Evidence Gap Map</strong> to help you filter and review frameworks based on fine-grained criteria.'
+                          "
+This app provides tools to explore data quality frameworks for social science research. It features an interactive <strong>Decision Tree</strong> and an <strong>Evidence Gap Map</strong> to help you filter and review frameworks based on fine-grained criteria of your data use case and assessment needs. More information on the development and the context of the tools is available from the corresponding <a href=\"https://www.doi.org/10.60762/ggdbd25026.1.0\" target=\"_blank\">GESIS Guide to DBD</a>.
+  "
                         ))
+
                         ,
 
                         h2(id = "paper_description", style = "color: #1E8CC8;", "Empirical Foundation: Systematic Review"),
-                        p(HTML("This collection of data quality frameworks is based on a systematic review outlined in        <a href='https://journals.sagepub.com/doi/10.1177/08944393241245395' target='_blank'>Daikeler et al. (2024)</a>. The study was driven by the growing use of digital behavioral data alongside traditional sources like survey data in social science research, which introduces various data quality challenges.
-To guide researchers, Daikeler et al. conducted a systematic literature review and identified 58 frameworks that address issues of data quality. In addition to a comprehensive discussion of general challenges related to data quality, the paper introduces two tools: (1) A <strong>Decision Tree</strong> that helps researchers to identify the appropriate data quality framework for their individual research use case, and (2) An <strong>Evidence Gap Map</strong>p that evaluates the types of errors discussed in the frameworks and highlights gaps in knowledge for specific research contexts.")),
+                        p(HTML(
+                          "This collection of data quality frameworks is based on a systematic review outlined in <a href='https://journals.sagepub.com/doi/10.1177/08944393241245395' target='_blank'>Daikeler et al. (2024)</a>. This study was driven by the growing use of digital behavioral data alongside traditional sources, such as survey data, in social science research, which presents various challenges related to data quality. To guide researchers, Daikeler et al. conducted a systematic literature review, identifying 58 frameworks that address data quality issues. In addition to a comprehensive discussion of the general challenges associated with the data quality of these new data types, the paper introduces two tools:
+  <ol>
+    <li><strong>Decision Tree</strong>: Helps researchers identify the appropriate data quality framework for their individual research use case.</li>
+    <li><strong>Evidence Gap Map</strong>: Evaluates the types of errors discussed in the frameworks and highlights gaps in knowledge for specific research contexts.</li>
+  </ol>"
+                        )),
 
-                        tabsetPanel(
-                          tabPanel("Decision Tree",
-                                   tags$div(
-                                     style = "padding-top: 10px;",
-                                     h3(style = "color: #1E8CC8;", "How to use the Decision Tree"),
-                                     tags$p(HTML(
-                                       "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_tree'>Decision Tree</span> serves as an initial guide to select appropriate data quality frameworks for different use cases.
-             Since decision trees are commonly utilized to facilitate decision-making in complex and high-dimensional scenarios, they enable researchers to choose frameworks that best suit their specific research problem."
-                                     )),
-                                     br(),
-                                     tags$ol(
-                                       tags$li(tags$b("Data Type:"), " Register Data, Sensor Data, Social Media Data, Survey Data, or Untargeted"),
-                                       tags$li(tags$b("Perspective:"), " Extrinsic (“data is usable”) or Intrinsic (“data is accurate”)"),
-                                       tags$li(tags$b("Granularity:"), " General (broader discussions around the various aspects of data quality) or Specific (detailed and practical focus)")
-                                     ),
-                                     p("Once filtered, you can download selected frameworks as a BibTeX file.")
-                                   )
-                          )
-                          ,
-                          tabPanel("Evidence Gap Map",
-                                   tags$div(
-                                     style = "padding-top: 10px;",
-                                     h3(style = "color: #1E8CC8;", "How to use the Evidence Gap Map"),
-                                     tags$p(HTML(
-                                       "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_map'>Evidence Gap Map</span> serves as a detailed guide of error sources and data types targeted by the (intrinsic) data quality frameworks.
-             It presents the selected error types for social science data on the y-axis, mapping them against selected data types on the x-axis.
-             The size of the bubble represents how many frameworks include the respective error source by data type. The errors covered are:"
-                                     )),
-                                     tags$ul(
-                                       tags$li(tags$b("Representation Errors"), tags$ul(
-                                         tags$li("Coverage Error"),
-                                         tags$li("Sampling Error"),
-                                         tags$li("Nonresponse Error")
-                                       )),
-                                       tags$li(tags$b("Measurement Errors"), tags$ul(
-                                         tags$li("Content Validity Error"),
-                                         tags$li("Measurement Error (Response)"),
-                                         tags$li("Measurement Error (Platform)"),
-                                         tags$li("Preprocessing Error")
-                                       )),
-                                       tags$li(tags$b("Modelling Errors"))
-                                     ),
-                                     p("Larger circles mean more publications on the topic. Hover over the bubbles to see the exact counts.")
-                                   )
-                          )
+                        tags$div(
+                          style = "padding-top: 10px;",
+                          h3(style = "color: #1E8CC8;", "How to use the Decision Tree"),
+                          tags$p(HTML(
+                            "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_tree'>Decision Tree</span> serves as an initial guide to select appropriate data quality frameworks for different use cases.
+    Decision trees are commonly utilized to facilitate decision-making in complex and high-dimensional scenarios. The one presented here enables you to choose frameworks that best suit your specific research problem.
+
+    The Decision Tree filters the frameworks along three dimensions:"
+                          )),
+                          br(),
+                          tags$ol(
+                            tags$li(tags$b("Data Type:"), " Register Data, Sensor Data, Social Media Data, Survey Data, or Untargeted"),
+                            tags$li(tags$b("Perspective:"), " Extrinsic (“data is usable”) or Intrinsic (“data is accurate”)"),
+                            tags$li(tags$b("Granularity:"), " General (broader discussions around the various aspects of data quality) or Specific (detailed and practical focus)")
+                          ),
+                          p("Once filtered, you can download selected frameworks as a BibTeX file.")
+                        ),
+
+                        tags$div(
+                          style = "padding-top: 10px;",
+                          h3(style = "color: #1E8CC8;", "How to use the Evidence Gap Map"),
+                          tags$p(HTML(
+                            "The <span style='color:#1E8CC8; cursor:pointer; text-decoration:underline;' id='link_to_map'>Evidence Gap Map</span> serves as a detailed guide to the error sources and data types targeted by the (intrinsic) data quality frameworks. It displays the selected data types on the x-axis, mapping them against the selected error types for social science data on the y-axis.
+    The size of the bubble represents how many frameworks include the respective error source by data type. The errors covered are:"
+                          )),
+                          tags$ul(
+                            tags$li(tags$b("Representation Errors"), tags$ul(
+                              tags$li("Coverage Error"),
+                              tags$li("Sampling Error"),
+                              tags$li("Nonresponse Error")
+                            )),
+                            tags$li(tags$b("Measurement Errors"), tags$ul(
+                              tags$li("Content Validity Error"),
+                              tags$li("Measurement Error (Response)"),
+                              tags$li("Measurement Error (Platform)"),
+                              tags$li("Preprocessing Error")
+                            )),
+                            tags$li(tags$b("Modelling Errors"))
+                          ),
+                          p("Larger circles mean more publications on the topic. Hover over the bubbles to see the exact counts.")
                         )
+
+
+
                  ),
-
-
 
                )
              )
@@ -127,7 +130,7 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
              div(
                style = "width: 100%; text-align: center; margin-bottom: 20px;",
                h2(style = "color: #1E8CC8;", "Decision Tree"),
-               div("The Decision Tree helps you to identify the appropriate data quality framework for your individual research use case", style = "font-size: 14px;")
+               div("The Decision Tree helps you to identify the appropriate data quality framework for your individual research use case.", style = "font-size: 14px;")
              ),
              fluidPage(
                fluidRow(
@@ -138,7 +141,7 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
                         uiOutput("bar_chart_desc")
                  ),
                  column(8,
-                        helpText("Filter the list using the dropdowns below:"),
+                        helpText("Filter the list using the dropdown panels below:"),
                         div(style="border: 1px solid #ccc; padding: 15px; border-radius: 5px;",
                             fluidRow(
                               column(4,
@@ -146,11 +149,11 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
                                      actionButton("clear_datatype", "Clear")
                               ),
                               column(4,
-                                     selectInput("col_perspective", "Perspective:", choices = c("", "extrinsic", "intrinsic")),
+                                     selectInput("col_perspective", "Perspective:", choices = c("", "Extrinsic", "Intrinsic")),
                                      actionButton("clear_perspective", "Clear")
                               ),
                               column(4,
-                                     selectInput("col_granularity", "Granularity:", choices = c("", "general", "specific")),
+                                     selectInput("col_granularity", "Granularity:", choices = c("", "General", "Specific")),
                                      actionButton("clear_granularity", "Clear")
                               )
                             )
@@ -170,7 +173,7 @@ To guide researchers, Daikeler et al. conducted a systematic literature review a
              div(
                style = "width: 100%; text-align: center; margin-bottom: 20px;",
                h2(style = "color: #1E8CC8;", "Evidence Gap Map"),
-               div("The Evidence Gap Map helps you to evaluate the types of errors discussed in the frameworks and highlights gaps of research", style = "font-size: 14px;")
+               div("The Evidence Gap Map helps you to evaluate the types of errors discussed in the frameworks and highlights gaps of research.", style = "font-size: 14px;")
              ),
              tags$iframe(
                src = "map_final.html",
@@ -197,8 +200,8 @@ server <- function(input, output, session) {
           TRUE ~ TRUE
         )) &
           (input$col_perspective == "" | case_when(
-            input$col_perspective == "extrinsic" ~ dummy_extrinsic == 1,
-            input$col_perspective == "intrinsic" ~ dummy_intrinsic == 1,
+            input$col_perspective == "Extrinsic" ~ dummy_extrinsic == 1,
+            input$col_perspective == "Intrinsic" ~ dummy_intrinsic == 1,
             TRUE ~ TRUE
           )) &
           (input$col_granularity == "" | dummy_granularity == input$col_granularity)
@@ -239,7 +242,7 @@ server <- function(input, output, session) {
       pivot_longer(cols = -dummy_granularity, names_to = "datatype", values_to = "value") %>%
       mutate(value = as.numeric(value)) %>%
       filter(value == 1) %>%
-      mutate(granularity = factor(ifelse(dummy_granularity == "specific", "Specific", "General"), levels = c("General", "Specific"))) %>%
+      mutate(granularity = factor(dummy_granularity, levels = c("General", "Specific"))) |>
       count(datatype, granularity)
 
     data_long$datatype <- factor(data_long$datatype, levels = c("Sensor Data", "Social Media Data", "Register Data", "Untargeted", "Survey Data"))
